@@ -1,7 +1,7 @@
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { getScores } from "../database/crud"; // Updated connection to your CRUD file
+import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { getScores, resetScore } from "../database/crud";
 
 interface ScoreRow {
     id: number;
@@ -14,22 +14,47 @@ export default function LeaderBoard() {
     const [scores, setScores] = useState<ScoreRow[]>([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        async function fetchScores() {
-            try {
-                const rows = await getScores() as unknown as ScoreRow[];
-
-                // Sort by time ascending (fastest time wins)
-                const sortedRows = (rows || []).sort((a, b) => a.time - b.time);
-                setScores(sortedRows.slice(0, 10));
-            } catch (error) {
-                console.error("Failed to load leaderboard:", error);
-            } finally {
-                setLoading(false);
-            }
+    // Separated the fetching logic so you can easily reuse it if needed
+    async function fetchScores() {
+        try {
+            const rows = await getScores() as unknown as ScoreRow[];
+            const sortedRows = (rows || []).sort((a, b) => a.time - b.time);
+            setScores(sortedRows.slice(0, 10));
+        } catch (error) {
+            console.error("Failed to load leaderboard:", error);
+        } finally {
+            setLoading(false);
         }
+    }
+
+    useEffect(() => {
         fetchScores();
     }, []);
+
+    const handleReset = async () => {
+        Alert.alert(
+            "Clear Leaderboard",
+            "Are you sure you want to delete all high scores?",
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Reset",
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            setLoading(true);
+                            await resetScore();
+                            setScores([]);
+                        } catch (error) {
+                            console.error("Failed to reset scores:", error);
+                        } finally {
+                            setLoading(false);
+                        }
+                    }
+                }
+            ]
+        );
+    };
 
     const formatTime = (totalSeconds: number) => {
         const mins = Math.floor(totalSeconds / 60);
@@ -51,7 +76,9 @@ export default function LeaderBoard() {
                     <Text style={styles.homeButtonText}>BACK</Text>
                 </TouchableOpacity>
                 <Text style={styles.titleText}>TOP LEAGUE</Text>
-                <View style={{ width: 80 }} />
+                <TouchableOpacity style={styles.resetButton} onPress={handleReset}>
+                    <Text style={styles.resetButtonText}>RESET</Text>
+                </TouchableOpacity>
             </View>
 
             {loading ? (
@@ -176,6 +203,27 @@ const styles = StyleSheet.create({
     playerTime: {
         fontSize: 18,
         fontWeight: "900",
+        letterSpacing: 1,
+    },
+    resetButton: {
+        backgroundColor: "#1E293B",
+        borderWidth: 2,
+        borderColor: "#FDE047",
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 12,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.3,
+        shadowRadius: 0,
+        elevation: 3,
+        minWidth: 80,
+        alignItems: "center",
+    },
+    resetButtonText: {
+        color: "#FDE047",
+        fontWeight: "900",
+        fontSize: 14,
         letterSpacing: 1,
     },
 });

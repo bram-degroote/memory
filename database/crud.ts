@@ -17,3 +17,8 @@ export async function createNewScore(time: number, name: string) {
     await statement.executeAsync({ $time: time, $name: name });
 
 }
+
+export async function resetScore() {
+    const db = await getDatabase();
+    db.execAsync("DELETE FROM scores;")
+}
