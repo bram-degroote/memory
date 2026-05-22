@@ -14,7 +14,6 @@ export default function LeaderBoard() {
     const [scores, setScores] = useState<ScoreRow[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // Separated the fetching logic so you can easily reuse it if needed
     async function fetchScores() {
         try {
             const rows = await getScores() as unknown as ScoreRow[];
