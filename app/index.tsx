@@ -8,14 +8,12 @@ export default function Index() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#0F172A" />
 
-      {/* Header / Logo Area */}
       <View style={styles.headerContainer}>
-        <Text style={styles.gameTitle}>ARCADE</Text>
-        <Text style={styles.gameSubtitle}>CHALLENGE</Text>
+        <Text style={styles.gameTitle}>MEMORY</Text>
+        <Text style={styles.gameSubtitle}>Challenge your brain</Text>
       </View>
 
 
-      {/* Navigation Menu */}
       <View style={styles.menuContainer}>
         <TouchableOpacity
           style={[styles.button, styles.primaryButton]}
